@@ -1,0 +1,32 @@
+{
+  "name": "devcamper_api",
+  "version": "1.0.0",
+  "description": "Devcamp project by brad traversy",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_ENV=production node server",
+    "favour": "nodemon server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/github.com/ojiakufavour.git"
+  },
+  "author": "OJIAKU FAVOUR",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/github.com/ojiakufavour/issues"
+  },
+  "homepage": "https://github.com/github.com/ojiakufavour#readme",
+  "devDependencies": {
+    "dotenv": "^9.0.2",
+    "nodemon": "^2.0.7"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.9",
+    "morgan": "^1.10.0",
+    "node-geocoder": "^3.27.0",
+    "slugify": "^1.5.3"
+  }
+}
