@@ -13,7 +13,7 @@ exports.getBootcamps = asyncHandler(async (request, response, next) => {
     const reqQuery = { ...request.query };
 
     // Fields to exclude
-    const removeFields = ['select', 'sort'];
+    const removeFields = ['select', 'sort', 'limit', 'page'];
 
     // Loop over removeFields and delete them from reqQuery
     removeFields.forEach(param => delete reqQuery[param]);
@@ -25,7 +25,8 @@ exports.getBootcamps = asyncHandler(async (request, response, next) => {
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
     // Finding resource
-    query = Bootcamp.find(JSON.parse(queryStr));
+    // .populate was added so courses under a bootcamp can be fetched
+    query = Bootcamp.find(JSON.parse(queryStr)).populate('courses');
 
     // Select fields
     if (request.query.select) {
@@ -40,14 +41,42 @@ exports.getBootcamps = asyncHandler(async (request, response, next) => {
     } else {
         query = query.sort('-createdAt'); 
     }
+
+    // Pagination
+    const page = parseInt(request.query.page, 10) || 1;
+    const limit = parseInt(request.query.limit, 10) || 25;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const total = await Bootcamp.countDocuments(); 
+
+    query = query.skip(startIndex).limit(limit);
+
     // Executing query
     const bootcamp = await query;
+
+    // Pagination result
+    const pagination = {};
+
+    if (endIndex < total) {
+        pagination.next = {
+            page: page + 1,
+            limit
+        }
+    }
+
+    if (startIndex > 0) {
+        pagination.prev = {
+            page: page - 1,
+            limit
+        }
+    }
     
     response
     .status(200)
     .json({ 
         success: 'true', 
         count: bootcamp.length,
+        pagination,
         data: bootcamp
     });   
 })
@@ -115,13 +144,18 @@ exports.updateBootcamp = asyncHandler(async (request, response, next) => {
 // @route   /api/v1/bootcamps/:id
 // @access  Public
 exports.deleteBootcamp = asyncHandler(async (request, response, next) => {
-    const bootcamp = await Bootcamp.findByIdAndDelete(request.params.id);
+    // Inorder to delete a bootcamp and their respective courses
+    // We will not use findbyidandDelete, rather we will find the
+    // Bootcamp and then delete it.
+    const bootcamp = await Bootcamp.findById(request.params.id);
 
     if (!bootcamp) {
         return next(
             new ErrorResponse(`Bootcamp not found with id of ${request.params.id}`, 404)
         );
     }
+
+    bootcamp.remove();
     response
         .status(200)
         .json({ 
