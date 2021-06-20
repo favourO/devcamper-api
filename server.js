@@ -1,9 +1,12 @@
+const path = require('path');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const errorHandler = require('./middleware/error');
 const connectDB = require('./config/db');
 const colors = require('colors');
+const fileUpload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
 
 
 // Load environment variables
@@ -14,6 +17,7 @@ connectDB();
 // Load Route Files
 const bootcampRoutes = require('./routes/bootcampRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 
 //initialize express server
@@ -23,14 +27,25 @@ const app = express();
 // Body Parser
 app.use(express.json());
 
+// Cookie Parser
+app.use(cookieParser());
+
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
+// File upload
+app.use(fileUpload());
+
+// Set static folder
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Mount Routers
 app.use('/api/v1/bootcamps', bootcampRoutes);
 app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1/auth', authRoutes);
+
 
 // Error Handler
 app.use(errorHandler);
