@@ -11,6 +11,7 @@ dotenv.config({ path: './config/config.env'});
 const Bootcamp = require('./models/Bootcamp');
 const Course = require('./models/Course');
 const User = require('./models/Users');
+const Review = require('./models/Review');
 
 // Progress Bar
 const bar = new cliProgress.SingleBar({}, cliProgress.Presets.legacy);
@@ -37,13 +38,16 @@ const users = JSON.parse(
     fs.readFileSync(`${__dirname}/_data/users.json`, 'utf-8')
 )
 
+const reviews = JSON.parse(
+    fs.readFileSync(`${__dirname}/_data/reviews.json`, 'utf-8')
+)
 // Import into DB
 const importData = async () => {
     try {
         await Bootcamp.create(bootcamps);
         await Course.create(courses);
         await User.create(users);
-        bar.stop();
+        await Review.create(reviews);
         console.log('Data Imported...'.green.inverse);
         process.exit();
 
@@ -54,13 +58,11 @@ const importData = async () => {
 
 // Delete data
 const deleteData = async () => {
-    //bar.start(200000, 0);
-    //bar.update(100000);
-    
     try {
         await Bootcamp.deleteMany();
         await Course.deleteMany();
         await User.deleteMany();
+        await Review.deleteMany();
         //bar.stop();
         console.log('Data Destroyed...'.red.inverse);
         process.exit();

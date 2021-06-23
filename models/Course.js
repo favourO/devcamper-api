@@ -89,7 +89,7 @@ const CourseSchema = new mongoose.Schema({
   });
   
   // Call getAverageCost after remove
-  CourseSchema.post('remove', async function () {
+  CourseSchema.pre('remove', async function () {
     await this.constructor.getAverageCost(this.bootcamp);
   });
   

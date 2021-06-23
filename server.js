@@ -2,11 +2,17 @@ const path = require('path');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
-const errorHandler = require('./middleware/error');
-const connectDB = require('./config/db');
 const colors = require('colors');
 const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const xss = require('xss-clean');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const cors = require('cors');
+const errorHandler = require('./middleware/error');
+const connectDB = require('./config/db');
 
 
 // Load environment variables
@@ -19,6 +25,7 @@ const bootcampRoutes = require('./routes/bootcampRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 
 //initialize express server
@@ -39,6 +46,28 @@ if (process.env.NODE_ENV === 'development') {
 // File upload
 app.use(fileUpload());
 
+// Sanitize data
+app.use(mongoSanitize); 
+
+// Set security headers
+app.use(helmet());
+
+// Prevent cross site scripting
+app.use(xss());
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 500
+})
+
+app.use(limiter);
+
+// Prevent http param polution
+app.use(hpp());
+
+// Enable CORS
+app.use(cors());
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -47,6 +76,7 @@ app.use('/api/v1/bootcamps', bootcampRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
 
 
 // Error Handler
