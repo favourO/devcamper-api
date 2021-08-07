@@ -26,7 +26,7 @@ exports.register = asyncHandler(async (request, response, next) => {
     })
 })
 
-// @desc    Register User
+// @desc    Login User
 // @route   POST /api/v1/auth/login
 // @access  Public
 exports.login = asyncHandler(async (request, response, next) => {
