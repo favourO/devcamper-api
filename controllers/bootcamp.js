@@ -166,6 +166,7 @@ exports.bootcampPhotoUpload = asyncHandler(async (request, response, next) => {
         );
     }
 
+    console.log(request.user.role);
     // Make sure only bootcamps owner can update them
     if (bootcamp.user.toString() !== request.user.id && request.user.role !== 'admin') {
         return next(
